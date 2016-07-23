@@ -1,0 +1,29 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: Ahmad Afuni
+email: aafx0@mail.ru
+description:
+  de: "Dies ist meine persönliche Webseite. Hier befinden sich meine Kontaktdaten, meine Forschungsinteresse, meine Lehre und meine anstehenden Vorträge."
+  fr: "C'est ma page personnelle. Ici se trouvent mes coordonnées et des informations sur mes recherches, mon enseignement et exposés prochains."
+  eo: "Jen estas mia retpaĝo persona. Tie ĉi vi povas trovi informaciojn pri miaj kieoj, reserĉo, instruado kaj prelegoj venontaj."
+  en: "This is my personal website. Here you may find information on my current whereabouts, research, teaching and upcoming talks."
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://ax0.github.io" # the base hostname & protocol for your site
+github_username: ax0
+xmpp_address: "aa0@dukgo.com"
+bm_address: "BM-2cVvHazJdqmTELTXmaZeiDc8WLhkwstfim"
+pgp_key_address: "https://pgp.mit.edu/pks/lookup?op=get&search=0xC5949ABBDA209661"
+pgp_key_word:
+  de: "PGP Schlüssel"
+  fr: "PGP clef"
+  eo: "PGP ŝlosilo"
+  en: "PGP key"
+
+# Build settings
+markdown: kramdown
