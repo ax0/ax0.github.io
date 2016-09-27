@@ -11,3 +11,5 @@ Meine Forschungsinteresse liegen in dem Durchschnitt der Differentialgeometrie, 
 Folgendes ist eine Liste meiner Vordrücke und Veröffentlichungen:
 
 {% include pubs.de.html %}
+
+Meine Doktorarbeit läßt sich [hier](http://www.diss.fu-berlin.de/diss/receive/FUDISS_thesis_000000098567) finden.

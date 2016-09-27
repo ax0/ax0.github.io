@@ -11,3 +11,5 @@ My research interests lie in the intersection of differential geometry, mathemat
 The following is a list of my preprints and publications:
 
 {% include pubs.html %}
+
+My Ph.D. thesis may be found [here](http://www.diss.fu-berlin.de/diss/receive/FUDISS_thesis_000000098567).

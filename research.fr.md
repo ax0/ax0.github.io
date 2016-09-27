@@ -11,3 +11,5 @@ Mes recherches se situent à l'intersection de la géométrie différentielle, d
 Ce qui suit est une liste de mes publications et prépublications :
 
 {% include pubs.fr.html %}
+
+Ma thèse est disponible [ici](http://www.diss.fu-berlin.de/diss/receive/FUDISS_thesis_000000098567).

@@ -11,3 +11,5 @@ Miaj reserĉaj interesoj kuŝas en la intersekcio de la geometrio diferenciala, 
 La jeno estas listo de miaj publikadoj kaj antaǔpresaĵoj:
 
 {% include pubs.eo.html %}
+
+Mia disertacio estas disponabla [tie ĉi](http://www.diss.fu-berlin.de/diss/receive/FUDISS_thesis_000000098567).
