@@ -6,4 +6,4 @@ ref: teaching
 permalink: /lehre/
 ---
 
-Gegenwärtig mache ich keine Lehre.
+[Differentialgeometrie III (Wintersemester 2017/2018)](http://geometricanalysis.mi.fu-berlin.de/teaching/teaching-WS1718.html)

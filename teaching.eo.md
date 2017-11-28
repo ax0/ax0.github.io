@@ -6,4 +6,4 @@ ref: teaching
 permalink: /instruado/
 ---
 
-Mi ne lernigas nune.
+[Geometrio Diferenciala III (Travintra semestro 2017/2018)](http://geometricanalysis.mi.fu-berlin.de/teaching/teaching-WS1718.html)

@@ -7,4 +7,4 @@ permalink: /teaching/
 tags: [Ahmad Afuni,teaching,courses]
 ---
 
-I am not teaching any courses at present.
+[Differential Geometry III (Winter 2017/2018)](http://geometricanalysis.mi.fu-berlin.de/teaching/teaching-WS1718.html)

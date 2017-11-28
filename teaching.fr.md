@@ -6,4 +6,4 @@ ref: teaching
 permalink: /enseignement/
 ---
 
-Je n'enseigne pas maintenant.
+[Géométrie Différentielle III (Semestre d'hiver 2017/2018)](http://geometricanalysis.mi.fu-berlin.de/teaching/teaching-WS1718.html)
