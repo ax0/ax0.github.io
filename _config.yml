@@ -16,8 +16,8 @@ description:
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://ax0.github.io" # the base hostname & protocol for your site
 github_username: ax0
-xmpp_address: "aa0@dukgo.com"
-bm_address: "BM-2cVvHazJdqmTELTXmaZeiDc8WLhkwstfim"
+xmpp_address: "ax0@jabber.cat"
+#bm_address: "BM-2cVvHazJdqmTELTXmaZeiDc8WLhkwstfim"
 pgp_key_address: "https://pgp.mit.edu/pks/lookup?op=get&search=0xC5949ABBDA209661"
 pgp_key_word:
   de: "PGP Schlüssel"
