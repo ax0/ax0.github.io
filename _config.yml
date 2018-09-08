@@ -7,7 +7,7 @@
 
 # Site settings
 title: Ahmad Afuni
-email: aafx0@mail.ru
+email: ahmad.afuni@outlook.com
 description:
   de: "Dies ist meine persönliche Webseite. Hier befinden sich meine Kontaktdaten, meine Forschungsinteresse, meine Lehre und meine anstehenden Vorträge."
   fr: "C'est ma page personnelle. Ici se trouvent mes coordonnées et des informations sur mes recherches, mon enseignement et exposés prochains."
@@ -17,6 +17,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://ax0.github.io" # the base hostname & protocol for your site
 github_username: ax0
 xmpp_address: "ax0@jabber.cat"
+orcid: "0000-0001-9937-3728"
 #bm_address: "BM-2cVvHazJdqmTELTXmaZeiDc8WLhkwstfim"
 pgp_key_address: "https://pgp.mit.edu/pks/lookup?op=get&search=0xC5949ABBDA209661"
 pgp_key_word:

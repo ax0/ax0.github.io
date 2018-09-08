@@ -138,20 +138,20 @@
 }
 
 .footer-col-1 {
-    width: -webkit-calc(25% - (#{$spacing-unit} / 2));
-    width:         calc(25% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(27.5% - (#{$spacing-unit} / 2));
+    width:         calc(27.5% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-2 {
-    width: -webkit-calc(22.5% - (#{$spacing-unit} / 2));
-    width:         calc(22.5% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(25% - (#{$spacing-unit} / 2));
+    width:         calc(25% - (#{$spacing-unit} / 2));
     word-wrap: break-word;
     padding-right: calc(5% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
-    width: -webkit-calc(47.5% - (#{$spacing-unit} / 2));
-    width:         calc(47.5% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(42.5% - (#{$spacing-unit} / 2));
+    width:         calc(42.5% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
