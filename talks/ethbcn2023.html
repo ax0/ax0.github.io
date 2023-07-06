@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Zero-knowledge Private Onchain Proof-based Voting</title>
+<meta name="author" content=""/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="file:///home/ax0/git-repos/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="file:///home/ax0/git-repos/reveal.js/dist/theme/black.css" id="theme"/>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1>Zero-knowledge Private Onchain Proof-based Voting</h1><br><br><br><br><br><br><br><br><br>Ahmad Afuni<br><img src="images/actual-AZKR-logo.png" width=1000px />
+</section>
+<section id="sec-table-of-contents"><div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#/slide-orgf34e53a">Introduction</a></li>
+<li><a href="#/slide-orgef3da64">Design and implementation</a></li>
+<li><a href="#/slide-org448a207">Outlook</a></li>
+</ul>
+</div>
+</div>
+</section>
+
+<section>
+<section id="slide-orgf34e53a">
+<h2 id="orgf34e53a">Introduction</h2>
+<div class="outline-text-2" id="text-orgf34e53a">
+</div>
+</section>
+<section id="slide-org45bf758">
+<h3 id="org45bf758">tl;dr</h3>
+<ul>
+<li>Token-based voting system</li>
+<li>Shielded votes</li>
+<li>Votes remain secret until the end of the period</li>
+<li>Onchain verification</li>
+
+</ul>
+</section>
+<section id="slide-orge123c56">
+<h3 id="orge123c56">Ideal workflow</h3>
+<ul>
+<li class="fragment"><p>
+Prospective voters enrol to vote.
+</p></li>
+<li class="fragment"><p>
+A proposal is made and put to a vote.
+</p></li>
+<li class="fragment"><p>
+Voter submits their vote.
+</p></li>
+<li class="fragment"><p>
+At end of voting period, votes are decrypted, tally is computed and results are published.
+</p>
+<div class="org-src-container">
+
+<pre  class="fragment {t}"   ><code trim>[registration] ---&gt; [voting process creation]
+---&gt; [vote] ---&gt; ... ---&gt; [vote]
+---&gt; [private key revealed] ---&gt; [compute and publish results]
+</code></pre>
+</div></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgef3da64">
+<h2 id="orgef3da64">Design and implementation</h2>
+<div class="outline-text-2" id="text-orgef3da64">
+</div>
+</section>
+<section id="slide-org54045d3">
+<h3 id="org54045d3">Overview</h3>
+<ul>
+<li class="fragment"><p>
+Locally generated private key for enrolment
+</p></li>
+<li class="fragment"><p>
+Time-locked public/private key for privacy till the end
+</p></li>
+<li class="fragment"><p>
+Votes may be submitted by anyone as long as they submit ZK proofs verifying that:
+</p>
+<ul>
+<li>submitter 'has' registry private key associated with actual address</li>
+<li>actual address owns a token</li>
+
+</ul></li>
+<li class="fragment">Approach is based on verifying storage proofs</li>
+
+</ul>
+
+</section>
+<section id="slide-org9555718">
+<h3 id="org9555718">Setup</h3>
+<ul>
+<li class="fragment"><p>
+Ethereum blockchain
+</p></li>
+<li class="fragment"><p>
+Fixed ERC-721 contract
+</p></li>
+<li class="fragment"><p>
+zkSNARK proving system
+</p>
+<ul>
+<li>Underlying field \(\mathbb{F}_{p}\)</li>
+<li>Embedded curve \(E\) with generator \(g\) (order less than \(p\))</li>
+<li>Possibility of onchain verification</li>
+
+</ul></li>
+<li class="fragment"><p>
+zkSNARK-friendly hash function \(h\)
+</p></li>
+<li class="fragment"><p>
+Compromise hash function \(h_{1}\)
+</p></li>
+<li class="fragment">Time-lock service for verifiably random key generation</li>
+
+</ul>
+</section>
+<section id="slide-orgb559730">
+<h3 id="orgb559730">Contracts</h3>
+<ul>
+<li class="fragment"><p>
+<b>Registry</b> contract containing pairs \((a,\mbox{Z})\) where \(a\) is an address and \(\mbox{Z}\)
+a public key on \(E\).
+</p></li>
+<li class="fragment"><b>Voting</b> contract containing addresses of registry and NFT contracts as well as the following for each voting process:
+<ul>
+<li class="fragment"><p>
+Specifiers (process ID, proposal title, description, vote choices, duration of voting period, time-lock key \(P_{t}\))
+</p></li>
+<li class="fragment"><p>
+Ballots (random public key \(A\), hash-encrypted vote \(B\) wrt. shared secret of \(A\) and \(P_{t}\), nullifier \(n\), proof of eligibility \(\pi\))
+</p></li>
+<li class="fragment"><p>
+Aggregation of votes as they come in (\(h_{1}\) reduction of \(B\)'s) and
+</p></li>
+<li class="fragment"><p>
+Results (final vote count, final aggregation, proof of tally)
+</p></li>
+
+</ul></li>
+<li class="fragment">Verifier smart contracts</li>
+
+</ul>
+</section>
+<section id="slide-org674380f">
+<h3 id="org674380f">Workflow</h3>
+<div class="org-src-container">
+
+<pre  class="src src-c"   ><code trim>[run computation + generate zk proof]
+---&gt; [submit public inputs and proof to contract]
+---&gt; [verification of proof] ---&gt; [store data]
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org2d8b895">
+<h3 id="org2d8b895">Registration</h3>
+<p class="fragment (t)" style="text-align:left">
+Steps:
+</p>
+<ul>
+<li class="fragment"><p>
+Generate private key \(z\) on \(E\)
+</p></li>
+<li class="fragment"><p>
+Compute corresponding public key \(Z\)
+</p></li>
+<li class="fragment">Submit \(z\) to the registry from the address owning the NFT</li>
+
+</ul>
+
+</section>
+<section id="slide-org63bc3af">
+<h3 id="org63bc3af">Voting process creation</h3>
+<p class="fragment (t)" style="text-align:left">
+Submit following to voting contract:
+</p>
+<ul>
+<li class="fragment"><p>
+Voting parameters (proposal title, description, vote choices, duration of voting period)
+</p></li>
+<li class="fragment"><p>
+<b>Recent</b> block number \(N\) (\(\Rightarrow\) block hash \(\underline{H_{\mbox{block}}}\))
+</p></li>
+<li class="fragment"><p>
+State root \(H_{\mbox{state}}\) and storage roots \(\underline{H_{1}}\), \(\underline{H_{2}}\) for the registry and NFT contracts block \(N\)
+</p></li>
+<li class="fragment"><p>
+ZK proof \(\pi_{0}\) with underlined public inputs that these roots correspond to block \(N\)
+</p></li>
+<li class="fragment">A public key \(P_{t}\) whose private key \(p_{t}\) will be revealed at the end of the voting period (via time lock)</li>
+
+</ul>
+
+</section>
+<section id="slide-orgddc5931">
+<h3 id="orgddc5931">Voting</h3>
+<p class="fragment (t)" style="text-align:left">
+For vote choice \(v\) associated with address \(a\), voting process \(\mbox{id}\), NFT \(\mbox{id}_{\mbox{nft}}\), the voter should:
+</p>
+<ul>
+<li class="fragment"><p>
+Compute signatures relative to registry key:
+\[\sigma = \mbox{sign}(Z,(\mbox{id}_{\mbox{nft}}, id)),  \tau=\mbox{sign}(Z,v)\]
+</p></li>
+<li class="fragment"><p>
+Compute nullifier \(\underline{n} = h(\sigma)\)
+</p></li>
+<li class="fragment"><p>
+Generate a random private key \(r\), and compute \(\underline{\mbox{A}} = g^{r}\), \(K = P_{t}^{r}\).
+</p></li>
+<li class="fragment"><p>
+Encrypt the vote \(v\) by computing \(\underline{B}=h(K,v,id)\).
+</p></li>
+<li class="fragment">Obtain <b>storage proofs</b> \(p_{1}\), \(p_{2}\) at block \(N\) s.t.
+<ul>
+<li>\(p_{1}\) resolves address \(a\) to public key \(z\) in the registry.</li>
+<li><p>
+\(p_{2}\) resolves address \(a\) to \(\mbox{id}_{\mbox{nft}}\) in the NFT contract.
+</p></li>
+
+</ul></li>
+<li class="fragment"><p>
+Generate a ZK proof \(\pi\) of this computation with underlined public inputs.
+</p></li>
+<li class="fragment">Submit \(\pi\) and underlined public inputs to voting contract.</li>
+
+</ul>
+</section>
+<section id="slide-orgdfffe5c">
+<h3 id="orgdfffe5c">Tallying</h3>
+<p class="fragment (t)" style="text-align:left">
+Given the private key \(p_{t}\) for the voting process with ballots \(\{(A_{i}, B_{i})\}\):
+</p>
+<ul>
+<li class="fragment"><p>
+Compute \(K_{i} = A_{i}^{p_{t}}\) and brute-force decrypt each \(B_{i}\) to obtain \(v_{i}\).
+</p></li>
+<li class="fragment"><p>
+Compute results \(\underline{\mbox{res}}\) of the voting process.
+</p></li>
+<li class="fragment"><p>
+Compute aggregation \(\underline{\mbox{agg}} := \mbox{foldl1}(h_{1}, [B_{1},\dots, B_{N}])\).
+</p></li>
+<li class="fragment"><p>
+Generate ZK proof \(\pi_\mbox{res}\) verifying the preceding two steps with public inputs \(\mbox{id}\) and underlined variables.
+</p></li>
+<li class="fragment">Submit \(\pi_{\mbox{res}}\) and its public inputs to the voting contract to publish results.</li>
+
+</ul>
+
+</section>
+<section id="slide-org40ac6cb">
+<h3 id="org40ac6cb">Challenges</h3>
+<ul>
+<li class="fragment"><p>
+Trie proofs: Very expensive in a zkSNARK.
+</p></li>
+<li class="fragment"><p>
+Gas-proving cost balance
+</p></li>
+<li class="fragment">Saving the whales</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org448a207">
+<h2 id="org448a207">Outlook</h2>
+<ul>
+<li class="fragment">Proof of concept</li>
+
+</ul>
+<ul>
+<li class="fragment">Optimisation</li>
+
+</ul>
+<ul>
+<li class="fragment">DAO integration</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org893a24b">
+<h2 id="org893a24b">Thank you for your attention</h2>
+
+<div id="org2ef8014" class="figure">
+<p><img src="./images/AZKR-logo.png" alt="AZKR-logo.png" width="1000px" align="center" />
+</p>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="/home/ax0/git-repos/reveal.js/dist/reveal.js"></script>
+<script src="file:///home/ax0/git-repos/reveal.js/plugin/markdown/markdown.js"></script>
+<script src="file:///home/ax0/git-repos/reveal.js/plugin/zoom/zoom.js"></script>
+<script src="file:///home/ax0/git-repos/reveal.js/plugin/notes/notes.js"></script>
+
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+plugins: [RevealMarkdown, RevealZoom, RevealNotes],
+controls:false, width: 1500, height: 1000
+});
+
+</script>
+</body>
+</html>
