@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Zero-knowledge Private Onchain Proof-based Voting</title>
+<title>Zero-knowledge Proof-based Onchain Private Voting</title>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -18,28 +18,28 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1>Zero-knowledge Private Onchain Proof-based Voting</h1><br><br><br><br><br><br><br><br><br>Ahmad Afuni<br><img src="images/actual-AZKR-logo.png" width=1000px />
+<section id="sec-title-slide"><h1>Zero-knowledge Proof-based Onchain Private Voting</h1><br><br><br><br><br><br><br><br><br>Ahmad Afuni<br><img src="images/actual-AZKR-logo.png" width=1000px />
 </section>
 <section id="sec-table-of-contents"><div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#/slide-org9386236">Introduction</a></li>
-<li><a href="#/slide-orgde39b1a">Design and implementation</a></li>
-<li><a href="#/slide-orgf1fe1d4">Outlook</a></li>
+<li><a href="#/slide-org109bcd5">Introduction</a></li>
+<li><a href="#/slide-orgf4921d1">Design and implementation</a></li>
+<li><a href="#/slide-org39b1201">Outlook</a></li>
 </ul>
 </div>
 </div>
 </section>
 
 <section>
-<section id="slide-org9386236">
-<h2 id="org9386236">Introduction</h2>
-<div class="outline-text-2" id="text-org9386236">
+<section id="slide-org109bcd5">
+<h2 id="org109bcd5">Introduction</h2>
+<div class="outline-text-2" id="text-org109bcd5">
 </div>
 </section>
-<section id="slide-org4924615">
-<h3 id="org4924615">tl;dr</h3>
+<section id="slide-org8d082bc">
+<h3 id="org8d082bc">tl;dr</h3>
 <ul>
 <li>Token-based voting system</li>
 <li>Shielded votes</li>
@@ -48,8 +48,8 @@
 
 </ul>
 </section>
-<section id="slide-org07a3dff">
-<h3 id="org07a3dff">Ideal workflow</h3>
+<section id="slide-orgf564f8e">
+<h3 id="orgf564f8e">Ideal workflow</h3>
 <ul>
 <li class="fragment"><p>
 Prospective voters enrol to vote.
@@ -76,13 +76,13 @@ At end of voting period, votes are decrypted, tally is computed and results are 
 </section>
 </section>
 <section>
-<section id="slide-orgde39b1a">
-<h2 id="orgde39b1a">Design and implementation</h2>
-<div class="outline-text-2" id="text-orgde39b1a">
+<section id="slide-orgf4921d1">
+<h2 id="orgf4921d1">Design and implementation</h2>
+<div class="outline-text-2" id="text-orgf4921d1">
 </div>
 </section>
-<section id="slide-orgce4404c">
-<h3 id="orgce4404c">Overview</h3>
+<section id="slide-org9eed4e2">
+<h3 id="org9eed4e2">Overview</h3>
 <ul>
 <li class="fragment"><p>
 Locally generated private key for enrolment
@@ -103,8 +103,8 @@ Votes may be submitted by anyone as long as they submit ZK proofs verifying that
 </ul>
 
 </section>
-<section id="slide-orgd34db8c">
-<h3 id="orgd34db8c">Setup</h3>
+<section id="slide-org788b8f4">
+<h3 id="org788b8f4">Setup</h3>
 <ul>
 <li class="fragment"><p>
 Ethereum blockchain
@@ -131,8 +131,8 @@ Compromise hash function \(h_{1}\)
 
 </ul>
 </section>
-<section id="slide-org95af23c">
-<h3 id="org95af23c">Contracts</h3>
+<section id="slide-org3d694a2">
+<h3 id="org3d694a2">Contracts</h3>
 <ul>
 <li class="fragment"><p>
 <b>Registry</b> contract containing pairs \((a,\mbox{Z})\) where \(a\) is an address and \(\mbox{Z}\)
@@ -158,8 +158,8 @@ Results (final vote count, final aggregation, proof of tally)
 
 </ul>
 </section>
-<section id="slide-orgbaaae43">
-<h3 id="orgbaaae43">Workflow</h3>
+<section id="slide-org21ba1f5">
+<h3 id="org21ba1f5">Workflow</h3>
 <div class="org-src-container">
 
 <pre  class="src src-c"   ><code trim>[run computation + generate zk proof]
@@ -169,8 +169,8 @@ Results (final vote count, final aggregation, proof of tally)
 </div>
 
 </section>
-<section id="slide-org2b34de8">
-<h3 id="org2b34de8">Registration</h3>
+<section id="slide-org5c638db">
+<h3 id="org5c638db">Registration</h3>
 <p class="fragment (t)" style="text-align:left">
 Steps:
 </p>
@@ -186,8 +186,8 @@ Compute corresponding public key \(Z\)
 </ul>
 
 </section>
-<section id="slide-orga9387e3">
-<h3 id="orga9387e3">Voting process creation</h3>
+<section id="slide-org441b4c5">
+<h3 id="org441b4c5">Voting process creation</h3>
 <p class="fragment (t)" style="text-align:left">
 Submit following to voting contract:
 </p>
@@ -209,8 +209,8 @@ ZK proof \(\pi_{0}\) with underlined public inputs that these roots correspond t
 </ul>
 
 </section>
-<section id="slide-org5ff46d3">
-<h3 id="org5ff46d3">Voting</h3>
+<section id="slide-orge724299">
+<h3 id="orge724299">Voting</h3>
 <p class="fragment (t)" style="text-align:left">
 For vote choice \(v\) associated with address \(a\), voting process \(\mbox{id}\), NFT \(\mbox{id}_{\mbox{nft}}\), the voter should:
 </p>
@@ -243,8 +243,8 @@ Generate a ZK proof \(\pi\) of this computation with underlined public inputs.
 
 </ul>
 </section>
-<section id="slide-orgc304e2d">
-<h3 id="orgc304e2d">Tallying</h3>
+<section id="slide-orga76aa4a">
+<h3 id="orga76aa4a">Tallying</h3>
 <p class="fragment (t)" style="text-align:left">
 Given the private key \(p_{t}\) for the voting process with ballots \(\{(A_{i}, B_{i})\}\):
 </p>
@@ -266,8 +266,8 @@ Generate ZK proof \(\pi_\mbox{res}\) verifying the preceding two steps with publ
 </ul>
 
 </section>
-<section id="slide-orgae0c2e4">
-<h3 id="orgae0c2e4">Challenges</h3>
+<section id="slide-org81affc9">
+<h3 id="org81affc9">Challenges</h3>
 <ul>
 <li class="fragment"><p>
 Trie proofs: Very expensive in a zkSNARK.
@@ -282,8 +282,8 @@ Gas-proving cost balance
 </section>
 </section>
 <section>
-<section id="slide-orgf1fe1d4">
-<h2 id="orgf1fe1d4">Outlook</h2>
+<section id="slide-org39b1201">
+<h2 id="org39b1201">Outlook</h2>
 <ul>
 <li class="fragment">Proof of concept</li>
 
@@ -300,10 +300,10 @@ Gas-proving cost balance
 </section>
 </section>
 <section>
-<section id="slide-orgfc3d76c">
-<h2 id="orgfc3d76c">Thank you for your attention</h2>
+<section id="slide-org062b093">
+<h2 id="org062b093">Thank you for your attention</h2>
 
-<div id="org2e3a3f7" class="figure">
+<div id="org60fcb61" class="figure">
 <p><img src="./images/AZKR-logo.png" alt="AZKR-logo.png" width="1000px" align="center" />
 </p>
 </div>
