@@ -1,0 +1,473 @@
+#+TITLE: Deep dive into GPCs
+#+DATE: 2024-11-14
+* 
+
+Ahmad Afuni
+* Summary / tl;dr
+GPCs allow us to make ZK proofs about PODs.
+
+* Code
+                                     
+    █▀▀▀▀▀█  ▀▄▄█▀███▀██▄ █▀▀▀▀▀█    
+    █ ███ █ ▀██▄▀ ▄▄▀ ▄▀  █ ███ █    
+    █ ▀▀▀ █  ▄▀  ▀ █  ██  █ ▀▀▀ █    
+    ▀▀▀▀▀▀▀ █▄█ █▄▀▄█▄▀ ▀ ▀▀▀▀▀▀▀    
+    ██▀▄▀▀▀██ ██ █▄ ▄█  ▄▀█  ▄▀ ▄    
+    ▄▀▀█▀▄▀▀▄▀ ▄ ▄▄▄ ██▄▀▀▀▄█ ▀█▀    
+    ▀ █ █▀▀▄█▄ ▄██▄ ██  ▄██  █ ▀█    
+     ▀▀▀██▀ ▄▄▄▀█▄▀▄█▄█ ▄▄█ ▀█ █▀    
+     ▄▄ █▀▀█▄█ █ █  ██▄▀▀▄█▀ █▄▀█    
+    ▀▄█▀ ▀▀▀█▀▄▄ ▄█ ▄█▀▄▄█▄██▄ █▀    
+    ▀   ▀▀▀ ▄ ▀▄██▄ ██▄██▀▀▀█ ▄▄▄    
+    █▀▀▀▀▀█ █▄ ▀███ ██▀▀█ ▀ ██ ▀█    
+    █ ███ █ ▀▄▀█▀█▄▀█▀▄ █▀▀██ ▄▄▄    
+    █ ▀▀▀ █ ██▄▄███▄ ▄██▄▄ ▀█▀ ▄▀    
+    ▀▀▀▀▀▀▀ ▀   ▀ ▀▀▀▀ ▀▀▀ ▀▀  ▀▀    
+                                     
+https://github.com/proofcarryingdata/zupass
+
+POD: ~packages/lib/pod~
+GPC compiler: ~packages/lib/gpc~
+GPCircuits: ~packages/lib/gpcircuits/circuits~
+
+* PODs
+- A POD is a cryptographically signed key-value store.
+- Call the keys /entries/ and values /entry values/.
+  
+* PODs more concretely
+- A POD's content is a JS object ~{e1: v1, ..., eN: vN}~.
+- A POD's content ID is obtained by first sorting its
+  entries, then Merkelising the array
+  ~[hash(e1), hash(v1), ..., hash(eN), hash(vN)]~ with
+  appropriate choices of hash functions (Keccak for strings,
+  Poseidon* for everything else).
+- A POD's signature is obtained by EdDSAPoseidonSigning
+  the content ID of the POD using a private key.
+- A POD's signature can be verified by EdDSAPoseidonVerifying
+  it using the signer's public key.
+
+* POD example: ID
+Example content:
+#+BEGIN_SRC js
+  id =
+      {
+          name: podString("John Doe")
+          dateOfBirth: podDate(NINETEEN_YEARS_AGO),
+          semaphoreId: podCryptographic("0x0baf..."),
+          ...
+      }
+#+END_SRC
+
+POD JS object:
+#+BEGIN_SRC js
+  {
+      content: Map(...) { ...,
+                          dateOfBirth: podDate(NINETEEN_YEARS_AGO),
+                          ...,
+                          name: podString("John Doe"),
+                          ...,
+                          semaphoreId: podCryptographic("0x0baf..."),
+                          ...},
+      signature: "0xaf...",
+      signerPublicKey: "0x1be..."
+  }
+#+END_SRC
+
+
+* POD example: ticket
+#+BEGIN_SRC js
+  ticket =
+      {
+          eventId: podCryptographic(5),
+          productId: podCryptographic(0),
+          ticketId: podCryptographic(10),
+          attendeeSemaphoreId: podCryptographic("0x0baf..."),
+          ...
+      }
+#+END_SRC
+
+POD JS object:
+#+BEGIN_SRC js
+  {
+      content: Map(...) { ...,
+                          attendeeSemaphoreId: podCryptographic("0x0baf..."),
+                          ...,
+                          eventId: podCryptographic(5),
+                          ...,
+                          productId: podCryptographic(0),
+                          ...
+                          ticketId: podCryptographic(10),
+                          ...},
+      signature: "0xaf...",
+      signerPublicKey: "0x1be..."
+  }
+#+END_SRC
+
+* Life before PODs
+- Define appropriate data structures
+- Choose cryptographic signature scheme
+- Write circuits
+- Encode these data structures as circuit inputs
+- Write glue code
+- ???
+- Profit
+
+* General Purpose Circuits
+** In a nutshell
+- A many-parameter family of reusable circuits.
+- Each circuit consists of a number of modules with a specific purpose.
+  
+*They allow us to make ZK proofs about PODs.*
+
+** Examples
+- I possess an unredacted speaker's ticket to ProgCrypto 2023.
+- A ticket to a Devconnect 2023 event was issued to me.
+- I am over the age of 18.
+
+** Examples more explicitly
+- I possess a ticket POD.
+  - It is signed by 0xPARC/PSE.
+  - It contains the eventID corresponding to ProgCrypto 2023.
+  - Its ~productId~ corresponds to that of a speaker's ticket.
+  - Its ~ticketId~ entry value does not lie in the list of redacted tickets.
+
+- I possess a ticket POD.
+  - It is signed by an organiser of a Devconnect 2023 event.
+  - It contains the eventID corresponding to an event organised by the
+    aforementioned organiser.
+  - Its ~attendeeSemaphoreId~ entry value is my semaphore ID.
+    
+- I possess an ID POD.
+  - It is signed by some (trusted) state.
+  - Its ~dateOfBirth~ entry value is less than the date equal to today's date minus 18 years.
+  - Its ~semaphoreId~ entry value is my semaphore ID.
+
+* GPCs from the user's POV
+#+BEGIN_SRC artist
+                   Click          
+                     |            
+                     v            
+            +--------------------+             
+  Click --> |Pop-up with dropdown|
+            +--------------------+             
+                     |                         
+                     v                         
+                   Action                       
+#+END_SRC
+
+* High level description of GPC compiler
+** Proving
+#+BEGIN_SRC artist
+           
+  Input      Proof configuration  
+             Proof inputs       
+            
+                     |              
+                     v               
+          +----------------------+
+          | Check config & input |
+          | Pick circuit         |
+          | Canonicalise config  |
+          | Compile inputs       |
+          | Prove                |
+          +----------------------+
+                     |            
+                     v            
+          
+  Output     Groth16 proof         
+             Bound proof config    
+             Revealed claims              
+#+END_SRC
+
+** Verifying
+#+BEGIN_SRC artist
+  Input     Groth16 proof        
+            Bound proof config   
+            Revealed claims      
+                                 
+                    |            
+                    v            
+          +--------------------+ 
+          | Check config/claims| 
+          | Verify proof       | 
+          +--------------------+ 
+                    |            
+                    v            
+                                 
+  Output        true/false       
+                        
+#+END_SRC
+* Examples
+** I possess an unredacted speaker's ticket to ProgCrypto 2023.
+#+BEGIN_SRC js
+  proofConfig = {
+      pods: {
+          ticketPOD: {
+              signerPublicKey: { isRevealed: true },
+              entries: {
+                  eventId: { isRevealed: true },
+                  productId: { isRevealed: true },
+                  ticketId: {
+                      isRevealed: false,
+                      isNotMemberOf: "redactedTickets"
+                  } } } } }
+
+  proofInput = {
+      pods: { ticketPOD },
+      membershipLists: { redactedTickets: [REDACTED1, ...] },
+      watermark: SOME_WATERMARK // optional
+  }
+
+  boundConfig = {...proofConfig, circuitIdentifier: "proto-pod-gpc_1o-10e-6md-0nv-0ei-1x100l-0x0t-1ov3-0ov4" }
+
+  revealedClaims = {
+      pods: {
+          ticketPOD: { entries: { eventId: EVENT_ID, productId: PRODUCT_ID },
+                       signerPublicKey: 0XPARC_PSE_PUBKEY}
+      },
+      watermark: SOME_WATERMARK,
+      membershipLists: { redactedTickets: ... }
+  }
+#+END_SRC
+
+** A ticket to a Devconnect 2023 event was issued to me.
+#+BEGIN_SRC js
+  proofConfig = {
+      pods: {
+          ticketPOD: {
+              signerPublicKey: { isRevealed: false },
+              entries: {
+                  attendeeSemaphoreId: { isRevealed: false, isOwnerID: "SemaphoreV3" },
+                  eventId: { isRevealed: false } } } },
+      tuples: {
+          pubkeyEventIdPair: {
+              entries: ["ticketPOD.signerPublicKey", "ticketPOD.eventId"],
+              isMemberOf: "devConnectPairs"
+          }
+      }}
+
+  proofInput = {
+      pods: { ticketPOD },
+      owner: {semaphoreV3: ownerIdentity, externalNullifier: SOME_VALUE},
+      membershipLists: { devconnectPairs: [[0XPARC_PSE_PUBKEY, PROGCRYPTO_ID], ...] },
+      watermark: SOME_WATERMARK // optional
+  }
+
+  boundConfig = {...proofConfig, circuitIdentifier: "proto-pod-gpc_1o-10e-6md-0nv-0ei-1x100l-1x2t-1ov3-0ov4" }
+
+  revealedClaims = {
+      pods: {},
+      owner: { externalNullifier: SOME_VALUE, nullifierHash: poseidon*([SOME_VALUE, ownerIdentity.nullifier]) }
+      watermark: SOME_WATERMARK,
+      membershipLists: { devconnectPairs: ... }
+  }
+#+END_SRC
+
+** I am over the age of 18.
+#+BEGIN_SRC js
+  proofConfig = {
+      pods: {
+          idPOD: {
+              signerPublicKey: { isRevealed: false, isMemberOf: "trustedStates" },
+              entries: {
+                  dateOfBirth: { isRevealed: false, inRange: { min: 0n, max: EIGHTEEN_YEARS_AGO } }
+                  semaphoreId: { isRevealed: false, isOwnerID: "SemaphoreV4" } } } } }
+
+  proofInput = {
+      pods: { idPOD },
+      owner: {semaphoreV3: ownerIdentity, externalNullifier: SOME_VALUE},
+      membershipLists: { trustedStates: [PUBKEY1, ...] },
+      watermark: SOME_WATERMARK // optional
+  }
+
+  boundConfig = {...proofConfig, circuitIdentifier: "proto-pod-gpc_1o-10e-8md-1nv-0ei-1x10l-0x0t-0ov3-1ov4" }
+
+  revealedClaims = {
+      pods: {},
+      owner: { externalNullifier: SOME_VALUE, nullifierHash: poseidon([SOME_VALUE, ownerIdentity.secretScalar]) }
+      watermark: SOME_WATERMARK,
+      membershipLists: { trustedStates: ... }
+  }
+#+END_SRC
+
+
+* Circuits: A refresher
+- Programs that compile down to proofs.
+- Functions are defined in terms of addition and multiplication in a field.
+- The inputs and outputs are of a fixed length.
+- Constant number of loop iterations.
+- No jumps.
+- The larger the program, the longer (and more memory intensive)
+  the proof generation.
+  
+=> Need to provide a number of templates to accommodate
+  different proofs about PODs.
+  
+* Modules
+** Object module
+
+#+BEGIN_SRC artist
+  Input  POD public key       
+         POD signature        
+         POD content ID       
+                |             
+                v             
+       +-----------------+
+       | Check signature |
+       | against pubkey  |
+       +-----------------+
+#+END_SRC
+** Entry module
+#+BEGIN_SRC artist
+  Input       POD content ID   
+              Entry name hash  
+                + Merkle proof 
+              Entry revealed?    
+                      |      
+                      v      
+             +--------------------+
+             |Check Merkle proof  |
+             |  against content ID|
+             +--------------------+
+                      |
+                      v
+  Output      Revealed entry value    
+                     hash        
+#+END_SRC
+
+** Virtual entry module
+#+BEGIN_SRC artist
+  Input  POD public key
+         POD content ID
+                |
+                v
+        +---------------+
+        |               |
+        +---------------+
+                |
+                v
+       POD public key hash
+       POD content ID hash
+#+END_SRC
+** Entry constraint module
+#+BEGIN_SRC artist
+  Input   Virtual/non-virtual entry  
+            value hash             
+          All virtual/non-entry value 
+            hashes                   
+          Index of equal entry value 
+           hash   
+                     |
+                     v
+           +--------------------+
+           | Check for equality |
+           +--------------------+
+#+END_SRC
+** Owner module (Semaphore V3/V4)
+#+BEGIN_SRC artist
+            Entry index of Semaphore
+              commitment           
+            Semaphore ID secret
+              (scalar or pair)
+            External nullifier           
+            Nullifier hash revealed?     
+                        |                
+                        v                
+           +-----------------------------+
+           |Check semaphore ID commitment|
+           +-----------------------------+
+                        |           
+                        v           
+  Output       Nullifier hash or -1     
+#+END_SRC
+** Numeric value module
+#+BEGIN_SRC artist
+            Numeric value                 
+            Corresponding entry 
+                value hash
+            Lower bound                 
+            Upper bound       
+                  |
+                  v
+           +-----------------+
+           |Check value hash |
+           |Check bounds     |
+           +-----------------+
+#+END_SRC
+** Entry inequality module
+#+BEGIN_SRC artist
+  Input     Entry values (pair)
+                    |  
+                    v  
+          +---------------------+
+          |        ...          |
+          +---------------------+
+                    |
+                    v
+            Entry 1 < entry 2?
+
+#+END_SRC
+** Tuple module
+#+BEGIN_SRC artist
+  Input     Indices of entries*
+                forming tuples
+            All entries*                     
+                    |  
+                    v  
+          +---------------------+
+          |        ...          |
+          +---------------------+
+                    |
+                    v
+               Tuple hash
+
+#+END_SRC
+** List membership module
+#+BEGIN_SRC artist
+  Input     Entry value hash            
+            List to check         
+                    |         
+                    v      
+          +----------------------+
+          | Check list for entry |
+          |      value hash      |
+          +----------------------+
+                    |
+                    v
+  Output          0 or 1
+#+END_SRC
+** POD uniqueness module
+#+BEGIN_SRC artist
+  Input      POD content IDs
+                    |  
+                    v  
+          +---------------------+
+          |        ...          |
+          +---------------------+
+                    |
+                    v
+            Content IDs unique?
+
+#+END_SRC
+** Global (watermark) module
+#+BEGIN_SRC artist
+  Input         Watermark
+                    |  
+                    v  
+          +---------------------+
+          |     Constraint      |
+          +---------------------+
+#+END_SRC
+
+
+* Life after POD + GPC
+- Write down data structure
+- Use GPC(PCD) library (or Z API)
+- ???
+- Profit
+ 
+* Future directions
+- More features
+- More PODs
+- More GPCs
+- Different stack
