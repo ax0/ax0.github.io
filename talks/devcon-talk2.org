@@ -1,0 +1,147 @@
+#+TITLE: POD 2
+#+DATE: 2024-11-15
+* 
+
+Ahmad Afuni
+* Summary / tl;dr
+POD 2 allows for easier composability than POD 1.
+
+* Code
+                                     
+    █▀▀▀▀▀█ ▄  ▀▄▀▄▄█▄▀▄  █▀▀▀▀▀█    
+    █ ███ █  ██▀ ██▄▀▄▄▄█ █ ███ █    
+    █ ▀▀▀ █ ▀█▄██▄▀    ▄  █ ▀▀▀ █    
+    ▀▀▀▀▀▀▀ ▀▄█ █▄█ █▄▀▄▀ ▀▀▀▀▀▀▀    
+    █ ▀▄█▄▀  ▀▄ ▄ ██▀▄ ▀▄ ▄ ▀▄ ▀▄    
+    █▀ ▀▀ ▀▄█▄ ▄ ▀ ▄███▄▀▀▀▄█ ▀█▀    
+    ▀▄▄▀  ▀ ▄ █▀▄▄ ▄▀▀▀  ██  █ ▀█    
+    ▀█▄▄▀ ▀▀▄█▄ █▄█▄██▄ ▄▄█ ▀█ █▀    
+     ▀▄ █ ▀ ▄█▀█▄ █ ▄█▄▀▀▄█▀ █▄▀█    
+    ▀▄ ▄▄ ▀ ▄▄█▀█▀ ▄▄▄▀▄▄█▄██▄ █▀    
+    ▀ ▀▀▀▀▀▀█▄▀▄█▄  ██ ██▀▀▀█ ▄▄▄    
+    █▀▀▀▀▀█  █▀▀▄▄█ █▄█▀█ ▀ ██ ▀▀    
+    █ ███ █ ▀█▀▀▀▄█▀██▄ █▀▀██ ▄▄█    
+    █ ▀▀▀ █ ▀ ▀  ▀   █▀█▄▄ ▀█▀ ▄▀    
+    ▀▀▀▀▀▀▀ ▀    ▀▀ ▀▀ ▀▀▀ ▀▀  ▀▀    
+                                     
+https://github.com/0xPARC/parcnet
+
+POD 1: ~parcnet-pod~
+POD 2: ~pod2~
+
+* POD 1: The story so far
+- A Merkelised key-value store, cf. Joel Gustafson's
+  /Merklizing the key/value store for fun and profit/.
+  
+- Constructed for ease of ZK proving.
+
+* POD 1 ZK workflow
+      
+               
+  PODs [private],    +------------+        Groth16 proof,               
+  proof config------>|  gpcProve  |------> revealed claims
+                     +------------+       
+#+END_SRC
+
+* Question
+#+BEGIN_SRC artist      
+              
+  PODs,                 +------------+        Groth16 proof,               
+  Groth16 proofs,------>|    ????    |------> revealed claims
+  revealed claims       +------------+       
+#+END_SRC
+
+* Why not Groth16?
+
+* PODs more concretely
+
+#+BEGIN_SRC haskell
+  type POD = (PODClaim, PODProof)
+  type PODClaim = (Map Key Value, PublicKey)
+  type PODProof = Signature
+
+  type GPC = (GPCClaim, GPCProof)
+  type GPCClaim = (ProofConfig, RevealedClaims)
+  type GPCProof = Groth16Proof
+#+END_SRC
+
+* POD 2 in a nutshell.
+
+#+BEGIN_SRC haskell
+  type POD2 = (POD2Claim, POD2Proof)
+  type POD2Claim = Map Key Statement
+  data POD2Proof = SchnorrProof Signature | Plonky2Proof Bytes
+#+END_SRC
+
+* Statements and operations
+
+#+BEGIN_SRC haskell
+  type Origin = (OriginID, String, GadgetID)
+  type AnchoredKey = (Origin, Key)
+
+  data Statement = NoStatement | ValueOf AnchoredKey Value
+          | Equal AnchoredKey AnchoredKey
+          | NotEqual AnchoredKey AnchoredKey
+          | SumOf AnchoredKey AnchoredKey
+          | ...
+
+  data Op = NoOp | NewEntry Key Value
+          | CopyStatement Statement
+          | EqualityFromEntries Statement Statement
+          | NonequalityFromEntries Statement Statement
+          | SumOfOp Statement Statement Statement
+          | ...
+#+END_SRC
+
+* POD types
+
+#+BEGIN_SRC haskell
+  ([ValueOf k1 v1, ValueOf k2 v2,...], SchnorrProof sig) :: SchnorrPOD
+
+  (claim, SchnorrProof ORACLE_SIG) :: OraclePOD
+
+  (claim, Plonky2Proof bytes) :: PlonkyPOD
+#+END_SRC
+
+* Gadgets
+Use 'gadgets' to create new PODs of different types:
+
+#+BEGIN_SRC haskell
+  type SchnorrGadget = Map Key Value ->            SecretKey            -> SchnorrPOD
+  type OracleGadget  = Map Key POD   -> Map Origin Origin -> [(Key, Op)] -> OraclePOD
+  type PlonkyGadget  = Map Key POD   -> Map Origin Origin -> [(Key, Op)] -> PlonkyPOD
+
+  data GadgetID = SchnorrGadgetID | OracleGadgetID | PlonkyGadgetID
+#+END_SRC
+
+
+* The Plonky gadget: a GPC analogue
+
+#+BEGIN_SRC artist      
+  PODs,              +----------------+
+  origin map  ------>| Plonky gadget  |------> PlonkyPOD      
+  operations         +----------------+   
+  [private] 
+#+END_SRC
+
+* The Plonky gadget in more detail
+#+BEGIN_SRC artist
+                      
+                      +--------------------------------------------------------+
+  Schnorr/OraclePODs  | +-------------------+                                  |
+         |____________|_| Verify SchnorrPOD |_____      +--------------------+ |
+                      | +-------------------+     |_____| Check origin map & |-|-------PlonkyPOD
+                      |                            _____|     apply ops      | |                
+                      | +------------------+      |     +--------------------+ |
+  PlonkyPODs----------|-| Verify PlonkyPOD |------                             |
+                      | +------------------+                                   |
+                      +--------------------------------------------------------+
+#+END_SRC
+
+* Future directions
+- Streamline workflow
+- Stronger cryptography
+- Non-native schemes
+- Backwards compatibility
+
+* Thank you for your attention
